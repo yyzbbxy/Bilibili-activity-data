@@ -16,13 +16,19 @@ class Data:
             if filename.endswith('.xlsx'):
                 file_path = os.path.join(data_dir, filename)
                 file = pd.read_excel(file_path)
+                file['起始时间'] = pd.to_datetime(file['起始时间'])
+                file['截止时间'] = pd.to_datetime(file['截止时间'])
                 data = pd.concat([data, file], ignore_index=True)
-        data = data.drop(['综合要求', '其他'], axis=1)        
+        data = data.drop(['综合要求', '其他'], axis=1)     
+        #清理重复项目
+        data.drop_duplicates(inplace=True,ignore_index=True)
+        print(data)
         
         return data
     def sort(self):
         start = pd.DataFrame(self.data['起始时间'].value_counts().index)
         date = np.array(start['起始时间'].astype(str))
+        print(date)
         xs = [(datetime.strptime(d, '%Y-%m-%d').date() + timedelta(days=-1)) for d in date]
         start.columns = ['time']
         start_left = pd.DataFrame(data=None,columns=['time'])
@@ -57,9 +63,9 @@ class Data:
         plt.figure(figsize=(18,6))
         plt.rcParams['font.sans-serif']=['SimHei']
         plt.rcParams['axes.unicode_minus']=False 
-        plt.title('B站活动变化',fontsize=25)  # 字体大小设置为25
-        plt.xlabel('日期',fontsize=10)   # x轴显示“日期”，字体大小设置为10
-        plt.ylabel('活动奖励数',fontsize=10)  # y轴显示“人数”，字体大小设置为10
+        plt.title('B站打卡活动任务数量变化',fontsize=25)  
+        plt.xlabel('日期',fontsize=10)   
+        plt.ylabel('活动任务数',fontsize=10)  
         plt.plot(total['time'], total['total'], 'o-',label='客流量')
         plt.tick_params(axis='both',which='both',labelsize=10)
  
